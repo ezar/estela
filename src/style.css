@@ -71,30 +71,49 @@ button:disabled {
 
 /* Start screen ---------------------------------------------------------- */
 
+/*
+ * There is no title element here. The name is written by the particles
+ * themselves, in shape mode, and it comes apart into the flow when the field is
+ * handed over. So this screen only darkens the bottom of the frame enough to
+ * carry the copy, and leaves the middle to the word.
+ */
 .start {
   position: absolute;
   inset: 0;
   display: grid;
-  place-content: center;
+  align-content: end;
   justify-items: center;
-  gap: 22px;
-  background: #000;
+  gap: 20px;
+  background: radial-gradient(
+    130% 78% at 50% 108%,
+    rgb(0 0 0 / 0.92) 0%,
+    rgb(0 0 0 / 0.72) 38%,
+    rgb(0 0 0 / 0.28) 62%,
+    rgb(0 0 0 / 0) 80%
+  );
   text-align: center;
-  padding: 24px;
-  transition: opacity 0.6s ease;
+  padding: 24px 24px min(14vh, 110px);
+  transition: opacity 0.9s ease;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.controls.is-hidden {
+  display: none;
 }
 
 .start.is-hidden {
   opacity: 0;
   pointer-events: none;
-}
-
-.start h1 {
-  margin: 0;
-  font-size: clamp(38px, 12vw, 84px);
-  font-weight: 300;
-  letter-spacing: 0.22em;
-  text-indent: 0.22em;
 }
 
 .start p {

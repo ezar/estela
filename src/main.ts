@@ -41,7 +41,9 @@ class App {
   private particleCount = defaultParticleCount();
   private bounds: [number, number] = [1, 1];
   private pixelRatio = 1;
-  private mode: Mode = 'flow';
+  // The field opens in shape mode: the name written by the particles is the
+  // title of the start screen, and it disperses into the flow on entering.
+  private mode: Mode = 'shape';
   private text = DEFAULT_TEXT;
   private camera: CameraStream | null = null;
   private videoAspect = 4 / 3;
@@ -49,6 +51,8 @@ class App {
   private lastFrame = 0;
   private frameHandle = 0;
   private shapeTimer: number | null = null;
+  /** True until the field is handed over: the name is the title, not the shape. */
+  private intro = true;
   private wakeLock: WakeLockSentinel | null = null;
 
   constructor(canvas: HTMLCanvasElement, ui: HTMLElement) {
@@ -57,8 +61,9 @@ class App {
     this.simulation = new Simulation(this.gl);
     this.renderer = new Renderer(this.gl);
 
-    this.resize();
+    this.applyViewport();
     this.buffers = this.createBuffers();
+    this.updateShape();
 
     this.hud = new Hud(ui, {
       mode: this.mode,
@@ -155,6 +160,10 @@ class App {
     } finally {
       this.hud.setStartBusy(false);
       this.hud.hideStart();
+      // The word comes apart as the screen fades.
+      this.intro = false;
+      this.setMode('flow');
+      this.hud.setMode('flow');
       void this.requestWakeLock();
     }
   }
@@ -208,6 +217,13 @@ class App {
   }
 
   private resize() {
+    this.applyViewport();
+    // The rest positions are in world units, so a new aspect ratio needs a new
+    // raster. Only ever called once the buffers exist.
+    if (this.mode === 'shape') this.updateShape();
+  }
+
+  private applyViewport() {
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
     const width = Math.max(1, Math.round(this.canvas.clientWidth * ratio));
     const height = Math.max(1, Math.round(this.canvas.clientHeight * ratio));
@@ -216,7 +232,6 @@ class App {
     this.pixelRatio = ratio;
     this.bounds = [width / height, 1];
     this.renderer.resize(width, height);
-    if (this.mode === 'shape') this.updateShape();
   }
 
   private setMode(mode: Mode) {
@@ -232,8 +247,15 @@ class App {
   }
 
   private updateShape() {
+    // As the title the word is small and sits above the copy; once it is the
+    // user's word it gets the whole frame.
+    const layout = this.intro ? { widthFraction: 0.52, heightFraction: 0.2, offsetY: 0.22 } : {};
     this.buffers.setRestPositions(
-      restPositionsFromText(this.text, { bounds: this.bounds, count: this.particleCount }),
+      restPositionsFromText(this.intro ? DEFAULT_TEXT : this.text, {
+        bounds: this.bounds,
+        count: this.particleCount,
+        ...layout,
+      }),
     );
   }
 
