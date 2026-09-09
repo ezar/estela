@@ -31,6 +31,17 @@ npm run format
 The camera needs a secure context. `localhost` counts; on a phone over the local
 network it does not, so use a tunnel or deploy.
 
+## Deploying
+
+Pushing to `main` publishes to GitHub Pages at
+<https://ezar.github.io/estela/> through `.github/workflows/deploy.yml`. The
+workflow turns Pages on the first time it runs, so there is nothing to set by
+hand. It builds the same way you would locally, which means the model and the
+wasm runtime are downloaded during the build rather than committed.
+
+The build uses relative asset paths, so it works both from a subdirectory, as
+on Pages, and from the root of a domain, as on Vercel.
+
 ## What is on screen
 
 - **Flow**, the default. A curl noise field drags the particles into currents

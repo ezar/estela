@@ -18,8 +18,17 @@ export interface DetectionResult {
   time: number;
 }
 
-const WASM_PATH = 'wasm';
-const MODEL_PATH = 'models/hand_landmarker.task';
+/**
+ * Absolute URLs for the wasm runtime and the model. The app is served from a
+ * subdirectory on GitHub Pages, and MediaPipe concatenates these prefixes with
+ * its own file names before fetching, so resolving them here against the
+ * document keeps a bare relative path from being read as a site root path.
+ */
+const asset = (path: string) =>
+  new URL(`${import.meta.env.BASE_URL}${path}`, document.baseURI).href;
+
+const WASM_PATH = asset('wasm');
+const MODEL_PATH = asset('models/hand_landmarker.task');
 const TARGET_INTERVAL = 1 / 30;
 
 export class HandTracker {
