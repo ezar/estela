@@ -6,6 +6,7 @@
  * touching the simulation.
  */
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
+import { fetchAsset } from '../assets/compressed';
 
 /** A hand as a list of 21 points in normalised video space, origin top left. */
 export interface HandSample {
@@ -40,15 +41,30 @@ export class HandTracker {
   private rafHandle: number | null = null;
 
   async load(): Promise<void> {
+    // The resolver picks the SIMD or the plain build; both arrive compressed,
+    // so hand the runtime the bytes rather than a path it would fetch itself.
     const fileset = await FilesetResolver.forVisionTasks(WASM_PATH);
-    this.landmarker = await HandLandmarker.createFromOptions(fileset, {
-      baseOptions: { modelAssetPath: MODEL_PATH, delegate: 'GPU' },
-      runningMode: 'VIDEO',
-      numHands: 2,
-      minHandDetectionConfidence: 0.5,
-      minHandPresenceConfidence: 0.5,
-      minTrackingConfidence: 0.5,
-    });
+    const [runtime, model] = await Promise.all([
+      fetchAsset(fileset.wasmBinaryPath),
+      fetchAsset(MODEL_PATH),
+    ]);
+    const runtimeUrl = URL.createObjectURL(new Blob([runtime], { type: 'application/wasm' }));
+
+    try {
+      this.landmarker = await HandLandmarker.createFromOptions(
+        { ...fileset, wasmBinaryPath: runtimeUrl },
+        {
+          baseOptions: { modelAssetBuffer: model, delegate: 'GPU' },
+          runningMode: 'VIDEO',
+          numHands: 2,
+          minHandDetectionConfidence: 0.5,
+          minHandPresenceConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        },
+      );
+    } finally {
+      URL.revokeObjectURL(runtimeUrl);
+    }
   }
 
   /** Runs one inference to pay the first frame cost before anything is on screen. */

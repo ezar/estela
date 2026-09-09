@@ -95,12 +95,12 @@ export class Recorder {
 
 async function deliver(blob: Blob, mimeType: string, callbacks: RecorderCallbacks) {
   const extension = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
-  const name = `enjambre-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.${extension}`;
+  const name = `estela-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.${extension}`;
   const file = new File([blob], name, { type: blob.type });
 
   if (navigator.canShare?.({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: 'enjambre' });
+      await navigator.share({ files: [file], title: 'estela' });
       callbacks.onFinish?.('shared');
       return;
     } catch (error) {

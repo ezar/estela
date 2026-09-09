@@ -1,5 +1,5 @@
 /**
- * enjambre
+ * estela
  *
  * A field of particles that reacts to your hands through the webcam. The camera
  * is processed every frame and never drawn: the hand is inferred from the hole
@@ -19,7 +19,7 @@ import { Hud } from './ui/hud';
 
 /** One half second hitch integrated at its real dt disintegrates the field. */
 const MAX_DELTA = 0.033;
-const DEFAULT_TEXT = 'enjambre';
+const DEFAULT_TEXT = 'estela';
 
 function defaultParticleCount(): number {
   const cores = navigator.hardwareConcurrency || 4;
@@ -309,7 +309,7 @@ function boot() {
     const panel = document.createElement('div');
     panel.className = 'fatal';
     const title = document.createElement('h1');
-    title.textContent = 'enjambre';
+    title.textContent = 'estela';
     const text = document.createElement('p');
     text.textContent = message;
     panel.append(title, text);

@@ -1,4 +1,4 @@
-# enjambre
+# estela
 
 A field of one hundred thousand particles that reacts to your hands through the webcam. No instructions, no goal, no score. Open it, move your hand, that is the whole thing.
 
@@ -8,7 +8,10 @@ A field of one hundred thousand particles that reacts to your hands through the 
 
 **All code and documentation in this repository is written in English.** That covers source files, identifiers, comments, commit messages, this specification, the README, issues and pull requests. No mixed-language identifiers, no Spanish comments in English code.
 
-The only exception is the project name itself, `enjambre`, which is a proper noun.
+The only exception is the project name itself, `estela`, which is a proper noun.
+
+(The project was called `enjambre` in the first draft of this document and was
+renamed to `estela`, which is also the name of the repository.)
 
 Other conventions:
 
