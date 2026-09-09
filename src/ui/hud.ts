@@ -84,6 +84,8 @@ export class Hud {
 
     this.controls = element('div', 'controls');
     this.controls.append(mainRow, this.shapeRow, this.buildSettings());
+    // Nothing but the word and the button until the field is handed over.
+    this.controls.classList.add('is-hidden');
     this.controls.addEventListener('pointerenter', () => this.pin(true));
     this.controls.addEventListener('pointerleave', () => this.pin(false));
     this.controls.addEventListener('focusin', () => this.pin(true));
@@ -103,7 +105,10 @@ export class Hud {
 
   private buildStart(): HTMLElement {
     const start = element('div', 'start');
-    const title = element('h1');
+    // The title is the field itself, spelling the name in shape mode behind
+    // this screen. The heading is here for screen readers and for search, and
+    // the copy sits low so the word has the middle of the frame to itself.
+    const title = element('h1', 'sr-only');
     title.textContent = 'estela';
     const line = element('p');
     line.textContent = 'A hundred thousand particles that move out of the way of your hands.';
@@ -162,8 +167,12 @@ export class Hud {
 
   hideStart() {
     this.start.classList.add('is-hidden');
-    setTimeout(() => this.start.remove(), 700);
-    this.reveal();
+    setTimeout(() => this.start.remove(), 1000);
+    // Let the copy get out of the way before the controls arrive.
+    setTimeout(() => {
+      this.controls.classList.remove('is-hidden');
+      this.reveal();
+    }, 500);
   }
 
   setStartBusy(busy: boolean, label = 'Enter') {

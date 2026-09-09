@@ -6,7 +6,7 @@
  */
 import { execFileSync } from 'node:child_process';
 import { brotliCompress, constants } from 'node:zlib';
-import { mkdir, readdir, copyFile, readFile, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, copyFile, readFile, stat, utimes, writeFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,7 +35,14 @@ async function copyWasm() {
   await mkdir(WASM_DEST, { recursive: true });
   const files = await readdir(src);
   for (const file of files) {
-    await copyFile(join(src, file), join(WASM_DEST, file));
+    const source = join(src, file);
+    const destination = join(WASM_DEST, file);
+    await copyFile(source, destination);
+    // Carry the source timestamp over. A copy stamped with the time it ran
+    // would look newer than the Brotli copy made from it, and every `dev` or
+    // `build` would pay the compression again.
+    const { atime, mtime } = await stat(source);
+    await utimes(destination, atime, mtime);
   }
   console.log(`assets: copied ${files.length} wasm files to public/wasm`);
 }

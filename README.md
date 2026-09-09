@@ -48,8 +48,11 @@ unpacked in the browser, which takes a first visit from 19.7 MB to 8.4 MB. See
 
 ## What is on screen
 
-- **Flow**, the default. A curl noise field drags the particles into currents
-  and whatever leaves one edge comes back on the opposite one.
+- **The start screen has no title.** The name is written by the particles
+  themselves, in shape mode: it condenses out of the cloud, breathes, and comes
+  apart into the current when you enter.
+- **Flow**, the default once you are in. A curl noise field drags the particles
+  into currents and whatever leaves one edge comes back on the opposite one.
 - **Shape**. Every particle gets a rest position sampled from a rasterised word
   and a spring pulling it there, so hands break the word apart and it
   reassembles. The text field is the thing that makes every recording different.

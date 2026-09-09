@@ -8,13 +8,24 @@
  * it with their hands.
  */
 
-const RASTER_HEIGHT = 256;
+/**
+ * Resolution of the shorter side of the raster. Sizing by height alone would
+ * leave a portrait phone with a raster a hundred pixels wide and visibly
+ * stair-stepped letters.
+ */
+const RASTER_SHORT_SIDE = 256;
 const LUMINANCE_THRESHOLD = 0.35;
 
 export interface ShapeOptions {
   /** Half extents of the world rect: (aspect, 1). */
   bounds: readonly [number, number];
   count: number;
+  /** Share of the frame width the shape may fill. */
+  widthFraction?: number;
+  /** Share of the frame height the shape may fill. */
+  heightFraction?: number;
+  /** Vertical offset in world units, positive is up. */
+  offsetY?: number;
 }
 
 type Painter = (context: CanvasRenderingContext2D, width: number, height: number) => void;
@@ -23,13 +34,15 @@ type Painter = (context: CanvasRenderingContext2D, width: number, height: number
 export function restPositionsFromText(text: string, options: ShapeOptions): Float32Array {
   const trimmed = text.trim();
   if (trimmed.length === 0) return scatter(options);
+  const widthFraction = options.widthFraction ?? 0.88;
+  const heightFraction = options.heightFraction ?? 0.62;
   return rasterize((context, width, height) => {
     context.fillStyle = '#fff';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    const fontSize = fitFontSize(context, trimmed, width * 0.88, height * 0.62);
+    const fontSize = fitFontSize(context, trimmed, width * widthFraction, height * heightFraction);
     context.font = `600 ${fontSize}px ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif`;
-    context.fillText(trimmed, width / 2, height / 2);
+    context.fillText(trimmed, width / 2, height / 2 - offsetPixels(options, height));
   }, options);
 }
 
@@ -40,17 +53,32 @@ export function restPositionsFromImage(
 ): Float32Array {
   return rasterize((context, width, height) => {
     const size = imageSize(image);
-    const scale = Math.min(width / size.width, height / size.height) * 0.9;
+    const scale =
+      Math.min(
+        (width * (options.widthFraction ?? 0.9)) / size.width,
+        (height * (options.heightFraction ?? 0.9)) / size.height,
+      ) || 1;
     const w = size.width * scale;
     const h = size.height * scale;
-    context.drawImage(image, (width - w) / 2, (height - h) / 2, w, h);
+    context.drawImage(
+      image,
+      (width - w) / 2,
+      (height - h) / 2 - offsetPixels(options, height),
+      w,
+      h,
+    );
   }, options);
 }
 
 function rasterize(paint: Painter, options: ShapeOptions): Float32Array {
+  // The raster keeps the aspect of the world rect, or the text comes out
+  // stretched when it is mapped back.
   const aspect = options.bounds[0] / options.bounds[1];
-  const height = RASTER_HEIGHT;
-  const width = Math.max(1, Math.round(RASTER_HEIGHT * aspect));
+  const height = Math.max(
+    1,
+    Math.round(aspect >= 1 ? RASTER_SHORT_SIDE : RASTER_SHORT_SIDE / aspect),
+  );
+  const width = Math.max(1, Math.round(height * aspect));
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -91,6 +119,11 @@ function rasterize(paint: Painter, options: ShapeOptions): Float32Array {
 }
 
 /** Fallback rest positions: a uniform cloud, used when nothing was drawn. */
+/** World units to raster pixels: the world is two units tall, the raster one canvas. */
+function offsetPixels(options: ShapeOptions, height: number): number {
+  return ((options.offsetY ?? 0) * height) / 2;
+}
+
 function scatter({ count, bounds }: ShapeOptions): Float32Array {
   const rest = new Float32Array(count * 2);
   for (let i = 0; i < count; i += 1) {
