@@ -1,5 +1,5 @@
 {
-  "name": "enjambre",
+  "name": "estela",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -17,7 +17,8 @@
     "prepare": "simple-git-hooks"
   },
   "dependencies": {
-    "@mediapipe/tasks-vision": "^0.10.22"
+    "@mediapipe/tasks-vision": "^0.10.22",
+    "brotli-dec-wasm": "^2.3.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

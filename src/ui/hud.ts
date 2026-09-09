@@ -104,7 +104,7 @@ export class Hud {
   private buildStart(): HTMLElement {
     const start = element('div', 'start');
     const title = element('h1');
-    title.textContent = 'enjambre';
+    title.textContent = 'estela';
     const line = element('p');
     line.textContent = 'A hundred thousand particles that move out of the way of your hands.';
     const note = element('p', 'note');
@@ -186,7 +186,7 @@ export class Hud {
   fatal(message: string) {
     const panel = element('div', 'fatal');
     const title = element('h1');
-    title.textContent = 'enjambre';
+    title.textContent = 'estela';
     const text = element('p');
     text.textContent = message;
     panel.append(title, text);

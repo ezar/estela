@@ -80,6 +80,40 @@ name. `render/quad.vert.glsl` is the full screen triangle shared by the fade and
 present passes, and `render/present.frag.glsl` is the tonemap. Every shader
 still lives in its own `.glsl` file and is imported as a string.
 
+## The app unpacks its own assets
+
+A first visit downloads the MediaPipe wasm runtime and the hand landmarker
+model, 19 MB between them, and that is most of the twenty seconds the
+specification allows between opening the app and having a video to share.
+
+Normally the server compresses this and the browser transparently decompresses
+it. GitHub Pages serves files exactly as it is given them and offers no way to
+set `Content-Encoding`, so that route does not exist here. Nor can the browser
+be asked to do it directly: `DecompressionStream` handles gzip and deflate, and
+no browser exposes Brotli through it, verified on Chrome 141.
+
+So the assets are Brotli compressed at build time and the app carries a 208 KB
+Brotli decoder to unpack them. Measured:
+
+| asset           | raw      | gzip    | brotli  |
+| --------------- | -------- | ------- | ------- |
+| vision wasm     | 11.15 MB | 3.27 MB | 2.30 MB |
+| hand landmarker | 7.82 MB  | 5.81 MB | 5.37 MB |
+| wasm loader     | 0.32 MB  | 0.08 MB | 0.07 MB |
+
+A first visit measured end to end, served with no compression at all, went from
+19.68 MB to 8.38 MB. The decoder is loaded on demand, so it costs nothing to
+anyone who never turns the camera on, and the model weights are the floor: they
+are float16 and barely compress. The uncompressed originals are deployed
+alongside as a fallback and are never fetched unless a `.br` fails.
+
+Choosing gzip instead would need no decoder at all and land at 9.16 MB, 0.8 MB
+worse, and it is a one line change in `scripts/fetch-assets.mjs` and
+`src/assets/compressed.ts` if the dependency is ever unwanted.
+
+Compression is the slow part of the build: about 75 seconds at maximum quality
+for the three files, skipped when the `.br` copies are already up to date.
+
 ## Still deferred
 
 Depth from the landmark z channel and the segmentation silhouette mode are the

@@ -1,4 +1,4 @@
-# enjambre
+# estela
 
 A field of one hundred thousand particles that reacts to your hands through the
 webcam. No instructions, no goal, no score. Open it, move your hand, that is the
@@ -41,6 +41,10 @@ wasm runtime are downloaded during the build rather than committed.
 
 The build uses relative asset paths, so it works both from a subdirectory, as
 on Pages, and from the root of a domain, as on Vercel.
+
+The two big MediaPipe assets are Brotli compressed during the build and
+unpacked in the browser, which takes a first visit from 19.7 MB to 8.4 MB. See
+[the decisions](docs/DECISIONS.md) for why the browser has to do the unpacking.
 
 ## What is on screen
 
